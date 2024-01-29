@@ -20,7 +20,7 @@ if min(y)<0
     y = (y-min(y))+512;
 end
 
-scatter(x,y)
+% scatter(x,y)
 
 
 % img = h5Read(h5file, '/data', [1 1 i], [512,512,1]);
@@ -109,7 +109,7 @@ timepoint = hz(minIdx);
 
 
 
-txt = input(['Save video at time: ' num2str(timepoint/15/60) ' min? (y/n)...'],"s")
+txt = input(['Save video at time: ' num2str(timepoint/15/60) ' min? (y/n)...'],"s");
 if strcmp(txt,'y')
     makeVideoFromTimepoints(folder, timepoint, 30)
 end
