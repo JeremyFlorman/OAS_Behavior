@@ -40,7 +40,7 @@ imageResolution = 512;
 sizeOfOneImage = [512, 512];
 
 % Create a blank canvas for the combined image
-imgSz = max(max(y_steps),max(x_steps));
+imgSz = max(max(y_steps),max(x_steps))+imageResolution;
 
 combinedImageSize = [max(y_steps) + sizeOfOneImage(1) - 1, max(x_steps) + sizeOfOneImage(2) - 1];
 combinedImage = zeros(combinedImageSize);
@@ -84,19 +84,28 @@ for j = length(h5):-1:1
     end
 end
 
-% Display the combined image
-imagesc(combinedImage, [50,256]);
-colormap('bone')
-line(x_steps(:),y_steps(:),1:length(x_steps));
+%% Display the combined image
+ax = gca;
+scatter3(x_steps(:),y_steps(:),1:length(x_steps),1,videoEvents.velocity);
+colormap turbo
+view(2);
+grid off
+freezeColors(ax)
+hold(ax, 'on');
+imh = imagesc(combinedImage, [50,256]);
+colormap bone
+hold(ax, 'off')
+uistack(imh, 'bottom')
+
 set(gca, 'YDir', 'normal');
+ylim([0 combinedImageSize(1)])
+xlim([0 combinedImageSize(2)])
 
 
 
 %% 
 [xPt,yPt] = ginput(1); 
 % Get (x,y) coordinates for all points
-% *** This assumes the entire point was made with the one 
-% call to scatter() instead of several calls to scatter(). 
 h = gco(); 
 hx = h.XData; 
 hy = h.YData; 
@@ -113,37 +122,3 @@ txt = input(['Save video at time: ' num2str(timepoint/15/60) ' min? (y/n)...'],"
 if strcmp(txt,'y')
     makeVideoFromTimepoints(folder, timepoint, 30)
 end
-
-% 
-% 
-% h.ButtonDownFcn = @showZValueFcn;
-% 
-% %
-% function [coordinateSelected, minIdx] = showZValueFcn(hObj, event,folder)
-% %  FIND NEAREST (X,Y,Z) COORDINATE TO MOUSE CLICK
-% % Inputs:
-% %  hObj (unused) the axes
-% %  event: info about mouse click
-% % OUTPUT
-% %  coordinateSelected: the (x,y,z) coordinate you selected
-% %  minIDx: The index of your inputs that match coordinateSelected.
-% 
-% x = hObj.XData;
-% y = hObj.YData; 
-% z = hObj.ZData;
-% pt = event.IntersectionPoint;       % The (x0,y0,z0) coordinate you just selected
-% coordinates = [x(:),y(:),z(:)];     % matrix of your input coordinates
-% dist = pdist2(pt,coordinates);      %distance between your selection and all points
-% [~, minIdx] = min(dist);            % index of minimum distance to points
-% coordinateSelected = coordinates(minIdx,:); %the selected coordinate
-% % from here you can do anything you want with the output.  This demo
-% % just displays it in the command window.
-% % fprintf('[x,y,z] = [%.5f, %.5f, %.5f]\n', coordinateSelected)
-% 
-% timepoint = coordinateSelected(3);
-% % 
-% % txt = input(['Save video at time: ' num2str(timepoint/15/60) ' min? (y/n)...'],"s")
-% % if strcmp(txt,'y')
-%     makeVideoFromTimepoints(folder, timepoint, 30)
-% % end
-% end
