@@ -1,4 +1,4 @@
-folder  = 'C:\src\OpenAutoScope-v2\data\wt_food_tap_stimulus\2024-1-10_wt+tap\2024_01_10_13_27_11_flircamera_behavior';
+folder  = 'C:\src\OpenAutoScope-v2\data\Hannah\2024_1_30_wt_2\2024_01_30_11_30_45_flircamera_behavior';
 
 d = dir([folder '\*videoEvents.mat']);
 h5 = dir([folder '\*.h5']);
@@ -46,7 +46,7 @@ combinedImageSize = [max(y_steps) + sizeOfOneImage(1) - 1, max(x_steps) + sizeOf
 combinedImage = zeros(combinedImageSize);
 
 locIdx = length(x_steps);
-stepsize = 15;
+stepsize = 75;
 
 for j = length(h5):-1:1
     h5file = fullfile(h5(j).folder,h5(j).name);
@@ -55,36 +55,35 @@ for j = length(h5):-1:1
     h5Sz = info.Dataspace.Size;
 
     % Load and position each image onto the combined image
-    for i =h5Sz(3):-stepsize:1%numel(x_pixels)
+    for i =h5Sz(3):-stepsize:1
 
-        img = fliplr(rot90(h5read(h5file, '/data', [1 1 i], [512,512,1])));
+        img = fliplr(rot90(imflatfield(h5read(h5file, '/data', [1 1 i], [512,512,1]),20)));
         sizeOfOneImage = [h5Sz(1), h5Sz(2)];  % Image resolution
 
         % Adjust x and y coordinates based on image size
         if ~isnan(x_steps(locIdx)) && ~isnan(y_steps(locIdx))
             x_position = x_steps(locIdx) - round(sizeOfOneImage(2) / 2); % Adjusted for center alignment
             y_position = y_steps(locIdx) - round(sizeOfOneImage(1) / 2); % Adjusted for center alignment
+            % Define the region to update in the combined image
+            regionToUpdate = combinedImage(y_position:y_position + sizeOfOneImage(1) - 1, x_position:x_position + sizeOfOneImage(2) - 1);
 
-            % Check for overlapping pixels
-            overlapRegion = combinedImage(y_position:y_position + sizeOfOneImage(1) - 1, x_position:x_position + sizeOfOneImage(2) - 1) > 0;
+            % Update the region with non-zero values from the current image
+            regionToUpdate(regionToUpdate == 0) = img(regionToUpdate == 0);
 
-            % Create a logical index for non-overlapping pixels
-            nonOverlapIndex = ~overlapRegion;
-
-            % Position the image onto the combined image only for non-overlapping pixels
-            combinedImage(y_position:y_position + sizeOfOneImage(1) - 1, x_position:x_position + sizeOfOneImage(2) - 1) = ...
-                combinedImage(y_position:y_position + sizeOfOneImage(1) - 1, x_position:x_position + sizeOfOneImage(2) - 1) + double(img) .* nonOverlapIndex;
+            % Update the combined image with the modified region
+            combinedImage(y_position:y_position + sizeOfOneImage(1) - 1, x_position:x_position + sizeOfOneImage(2) - 1) = regionToUpdate;
         end
         locIdx = locIdx-stepsize;
 
         % imshow(combinedImage, [100 256]);
-        % line(x_steps(:),y_steps(:),2:3600)
+        % % line(x_steps(:),y_steps(:))
         % set(gca, 'YDir', 'normal');
         % drawnow();
     end
 end
 
 %% Display the combined image
+figure()
 ax = gca;
 scatter3(x_steps(:),y_steps(:),1:length(x_steps),1,videoEvents.velocity);
 colormap turbo
@@ -92,27 +91,27 @@ view(2);
 grid off
 freezeColors(ax)
 hold(ax, 'on');
-imh = imagesc(combinedImage, [50,256]);
-colormap bone
+imh = imshow(combinedImage, [100 250]);
+% colormap bone
 hold(ax, 'off')
 uistack(imh, 'bottom')
 
-set(gca, 'YDir', 'normal');
+% set(gca, 'YDir', 'normal');
 ylim([0 combinedImageSize(1)])
 xlim([0 combinedImageSize(2)])
 
 
 
-%% 
-[xPt,yPt] = ginput(1); 
+%%
+[xPt,yPt] = ginput(1);
 % Get (x,y) coordinates for all points
-h = gco(); 
-hx = h.XData; 
-hy = h.YData; 
-hz = h.ZData; 
+h = gco();
+hx = h.XData;
+hy = h.YData;
+hz = h.ZData;
 % Find the nearest point to selection
-d = sqrt((xPt-hx).^2 + (yPt-hy).^2); 
-[~,minIdx] = min(d); 
+d = sqrt((xPt-hx).^2 + (yPt-hy).^2);
+[~,minIdx] = min(d);
 
 timepoint = hz(minIdx);
 

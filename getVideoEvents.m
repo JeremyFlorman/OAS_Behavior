@@ -78,6 +78,8 @@ for i = 2:length(xLoc)-(fps+1)
     velocity(i) = sqrt(dx.^2 + dy.^2);
 end
 
+velocity(velocity>0.5) = NaN;
+
 videoEvents.velocity = velocity;
 videoEvents.xLoc = xLoc;
 videoEvents.yLoc = yLoc;
