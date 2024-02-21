@@ -1,4 +1,4 @@
-folder  = 'C:\src\OpenAutoScope-v2\data\Hannah\2024_1_30_wt_2\2024_01_30_11_30_45_flircamera_behavior';
+folder  = 'C:\Users\Jeremy\Desktop\2024_1_30_wt_2\2024_01_30_11_30_45_flircamera_behavior';
 
 d = dir([folder '\*videoEvents.mat']);
 h5 = dir([folder '\*.h5']);
@@ -47,13 +47,12 @@ combinedImage = zeros(combinedImageSize);
 
 locIdx = length(x_steps);
 stepsize = 75;
-
+tic
 for j = length(h5):-1:1
     h5file = fullfile(h5(j).folder,h5(j).name);
     info =h5info(h5file, '/data');
 
     h5Sz = info.Dataspace.Size;
-
     % Load and position each image onto the combined image
     for i =h5Sz(3):-stepsize:1
 
@@ -69,6 +68,7 @@ for j = length(h5):-1:1
 
             % Update the region with non-zero values from the current image
             regionToUpdate(regionToUpdate == 0) = img(regionToUpdate == 0);
+%             imshow([regionToUpdate img], [150 256])
 
             % Update the combined image with the modified region
             combinedImage(y_position:y_position + sizeOfOneImage(1) - 1, x_position:x_position + sizeOfOneImage(2) - 1) = regionToUpdate;
@@ -81,11 +81,12 @@ for j = length(h5):-1:1
         % drawnow();
     end
 end
-
+toc
 %% Display the combined image
-figure()
+figure();
 ax = gca;
-scatter3(x_steps(:),y_steps(:),1:length(x_steps),1,videoEvents.velocity);
+inc = 1:10:length(x_steps);
+scatter3(x_steps(inc),y_steps(inc),1:length(x_steps(inc)),5,videoEvents.velocity(inc));
 colormap turbo
 view(2);
 grid off
@@ -96,13 +97,30 @@ imh = imshow(combinedImage, [100 250]);
 hold(ax, 'off')
 uistack(imh, 'bottom')
 
-% set(gca, 'YDir', 'normal');
+set(gca, 'YDir', 'normal');
 ylim([0 combinedImageSize(1)])
 xlim([0 combinedImageSize(2)])
 
 
 
 %%
+% 
+% 
+% % Initialize data cursor object
+% cursorobj = datacursormode(gcf);
+% cursorobj.SnapToDataVertex = 'on'; % Snap to our plotted data, on by default
+% 
+% while ~waitforbuttonpress 
+%     % waitforbuttonpress returns 0 with click, 1 with key press
+%     % Does not trigger on ctrl, shift, alt, caps lock, num lock, or scroll lock
+%     cursorobj.Enable = 'on'; % Turn on the data cursor, hold alt to select multiple points
+% end
+% cursorobj.Enable = 'off';
+% 
+% mypoints = getCursorInfo(cursorobj);
+% timepoint = mypoints(3);
+enableDefaultInteractivity(gca);
+
 [xPt,yPt] = ginput(1);
 % Get (x,y) coordinates for all points
 h = gco();
