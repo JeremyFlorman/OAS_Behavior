@@ -2,7 +2,7 @@ function [] = previewH5(h5Folder)
 %UNTITLED4 Summary of this function goes here
 %   Detailed explanation goes here
 
-h5Folder = 'C:\src\OpenAutoScope-v2\data\Hannah\2024_1_30_wt\2024_01_30_10_41_07_flircamera_behavior';
+h5Folder = 'C:\src\OpenAutoScope-v2\data\foraging\240221_foraging\2024_02_21_11_15_40_flircamera_behavior';
 
 d = dir([h5Folder '\*.h5']);
 figure();
