@@ -14,7 +14,7 @@ end
 
 
 
-h5dir = dir([videoEvents.folder '\*.h5']);
+h5dir = dir([folder '\*.h5']);
 
 fps = 15;
 fPre = timepoint-(windowInSeconds*fps);
@@ -103,12 +103,13 @@ if isfile(outputFileName)
     delete(outputFileName)
 end 
 
+frm = fPre:fPost;
+time = frm/15/60;
 for i = 1:size(catvid,3)
-    t = linspace(-windowInSeconds,windowInSeconds, length(catvid));
-    frm = fPre:fPost;
+%     t = linspace(-windowInSeconds,windowInSeconds, length(catvid));   
     position = [5 5; 5 20];
-    text_str = {['Time: ' num2str(t(i))], ['Frame: ' num2str(frm(i))]};
-    img = rgb2gray(insertText(catvid(:, :, i),position, text_str));
+    text_str = {['Time: ' num2str(round(time(i),2)) ' min'], ['Frame: ' num2str(frm(i))]};
+    img = rgb2gray(insertText(rot90(catvid(:, :, i),3),position, text_str));
     imwrite(img, outputFileName, 'WriteMode', 'append','Compression','none');
 end
 % 
