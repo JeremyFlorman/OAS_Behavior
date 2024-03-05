@@ -17,6 +17,7 @@ end
 h5dir = dir([folder '\*.h5']);
 
 fps = 15;
+annotateFrameNum =0;
 fPre = timepoint-(windowInSeconds*fps);
 fPost = timepoint+(windowInSeconds*fps);
 
@@ -101,28 +102,19 @@ end
 outputFileName = strrep(h5dir(1).folder, 'flircamera_behavior', ['Frames_' num2str(fPre) '-' num2str(fPost) '.tif']);
 if isfile(outputFileName)
     delete(outputFileName)
-end 
+end
 
 frm = fPre:fPost;
 time = frm/15/60;
+
 for i = 1:size(catvid,3)
-%     t = linspace(-windowInSeconds,windowInSeconds, length(catvid));   
-    position = [5 5; 5 20];
-    text_str = {['Time: ' num2str(round(time(i),2)) ' min'], ['Frame: ' num2str(frm(i))]};
-    img = rgb2gray(insertText(rot90(catvid(:, :, i),3),position, text_str));
+    if annotateFrameNum == 1
+        position = [5 5; 5 20];
+        text_str = {['Time: ' num2str(round(time(i),2)) ' min'], ['Frame: ' num2str(frm(i))]};
+        img = rgb2gray(insertText(rot90(catvid(:, :, i),3),position, text_str));
+    else
+        img = rot90(catvid(:, :, i),3);
+    end
     imwrite(img, outputFileName, 'WriteMode', 'append','Compression','none');
 end
-% 
-% figure();
-% for i = 1:length(catvid)
-%     t = linspace(-windowInSeconds,windowInSeconds, length(catvid));
-%     frm = fPre:fPost;
-%     imshow(catvid(:,:,i))
-%     ax = gca;
-%     text(ax,5,5,['Time: ' num2str(t(i))])
-%     text(ax,5,20,['Frame: ' num2str(frm(i))])
-%     drawnow();
-% end
-% 
-
 end
