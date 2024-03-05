@@ -12,9 +12,10 @@ xLoc = nan(length(videotimes),1);
 yLoc = nan(length(videotimes),1);
 xSteps = nan(length(videotimes),1);
 ySteps = nan(length(videotimes),1);
-mmPerStep = 0.001307092;
-fps=15;
-
+mmPerStep = 0.001307092; % for OAS behavior-only tracker
+fps=15; 
+stimtimes = [];
+stimnum = 1;
 
 
 [pth,~,~] = fileparts(h5Folder);
@@ -30,45 +31,35 @@ for i =1:length(logd)
 
         % only look at log events during our recording
         if lTime > videotimes(1) && lTime < videotimes(end)
+            % get stage coordinates
             if contains(line, 'tracker_behavior received position')
                 locTime = alignEvent(line,videotimes);
-
                 pattern = '(-?\d+),(-?\d+),(-?\d+)'; % Pattern to match three numbers separated by commas
                 r = regexp(line, pattern, 'tokens');
                 if ~isempty(r)
-                r=r{:};
-                xSteps(locTime,1) = str2double(r{1,1});
-                ySteps(locTime,1) = str2double(r{1,2});
-                xLoc(locTime,1) = str2double(r{1,1})*mmPerStep; % X coordinate in mm units
-                yLoc(locTime,1) = str2double(r{1,2})*mmPerStep; % Y coordinate in mm units
+                    r=r{:};
+                    xSteps(locTime,1) = str2double(r{1,1});
+                    ySteps(locTime,1) = str2double(r{1,2});
+                    xLoc(locTime,1) = str2double(r{1,1})*mmPerStep; % X coordinate in mm units
+                    yLoc(locTime,1) = str2double(r{1,2})*mmPerStep; % Y coordinate in mm units
                 end
-                % r = regexp(line,'(', 'split');
-                % r = regexp(r{end}, '\d+', 'match');
-                % 
-                % % % check for crossing origin % %
-                % if abs(xl)<originThreshold
-                %     if abs(xl)-abs(xLoc(locTime-1,1))>=0
-                %         xflip = xflip*-1;
-                %     end
-                % end
-                % 
-                % if abs(yl)<originThreshold
-                %     if abs(yl)-abs(yLoc(locTime-1,1))>=0
-                %         yflip = yflip*-1;
-                %     end
-                % end
-                % 
-                % % % convert orgin crossings to negative coordinates % %
-                % xLoc(locTime,1) = xl*xflip;
-                % yLoc(locTime,1) = yl*yflip;
+            end
 
-
-
+            if contains(line, 'DO _teensy_commands_set_led o 1')
+                stimidx(stimnum) = alignEvent(line,videotimes);               
+                stimnum = stimnum+1;
             end
         end
     end
 end
 
+ 
+
+stimtimes = videotimes(stimidx);
+stim_xLoc = xLoc(stimidx);
+stim_yLoc = yLoc(stimidx);
+stim_xSteps = xSteps(stimidx);
+stim_ySteps = ySteps(stimidx);
 
 velocity =NaN(length(videotimes),1);
 
@@ -91,9 +82,25 @@ spltnm = strsplit(h5Folder, '\');
 outname = [h5Folder '\' spltnm{end} '_videoEvents.mat'];
 save(outname, "videoEvents");
 
+
     function [idx] = alignEvent(event, time)
         et = regexp(event, ' ', 'split');
         eTime = str2double(et{1});
         idx = find(time>=eTime,1);
     end
+
+    function [time] = getVideoTimeStamps(h5Folder)
+        d = dir([h5Folder '\*.h5']);
+        for k = 1:length(d)
+            h5path = fullfile(d(k).folder,d(k).name);
+            temptime = h5read(h5path, '/times');
+
+            if k == 1
+                time = temptime;
+            else
+                time = cat(1,time, temptime);
+            end
+        end
+    end
+
 end
