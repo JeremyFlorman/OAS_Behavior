@@ -1,4 +1,4 @@
-folder  = 'C:\Users\Jeremy\Desktop\2024_1_30_wt_2\2024_01_30_11_30_45_flircamera_behavior';
+folder  = 'C:\src\OpenAutoScope-v2\data\foraging\240221_foraging\2024_02_21_11_15_40_flircamera_behavior';
 
 d = dir([folder '\*videoEvents.mat']);
 h5 = dir([folder '\*.h5']);
@@ -85,8 +85,8 @@ toc
 %% Display the combined image
 figure();
 ax = gca;
-inc = 1:10:length(x_steps);
-scatter3(x_steps(inc),y_steps(inc),1:length(x_steps(inc)),5,videoEvents.velocity(inc));
+% inc = 1:10:length(x_steps);
+scatter3(x_steps(:),y_steps(:),1:length(x_steps),2,videoEvents.velocity);
 colormap turbo
 view(2);
 grid off
@@ -103,24 +103,8 @@ xlim([0 combinedImageSize(2)])
 
 
 
-%%
-% 
-% 
-% % Initialize data cursor object
-% cursorobj = datacursormode(gcf);
-% cursorobj.SnapToDataVertex = 'on'; % Snap to our plotted data, on by default
-% 
-% while ~waitforbuttonpress 
-%     % waitforbuttonpress returns 0 with click, 1 with key press
-%     % Does not trigger on ctrl, shift, alt, caps lock, num lock, or scroll lock
-%     cursorobj.Enable = 'on'; % Turn on the data cursor, hold alt to select multiple points
-% end
-% cursorobj.Enable = 'off';
-% 
-% mypoints = getCursorInfo(cursorobj);
-% timepoint = mypoints(3);
+%% Select point to save video 
 enableDefaultInteractivity(gca);
-
 [xPt,yPt] = ginput(1);
 % Get (x,y) coordinates for all points
 h = gco();
