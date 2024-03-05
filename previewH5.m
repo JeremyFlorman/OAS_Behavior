@@ -6,7 +6,7 @@ h5Folder = 'C:\src\OpenAutoScope-v2\data\foraging\240221_foraging\2024_02_21_11_
 
 d = dir([h5Folder '\*.h5']);
 figure();
-for i = 1:length(d)
+for i =15:length(d)
     h5File = fullfile(d(i).folder, d(i).name);
     
     img = h5read(h5File, '/data');
